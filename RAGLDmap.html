@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>RAGLDmap example page</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="RAGLDmap example page">
+		<meta name="author" content="taes1g09">
+
+		<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/css/bootstrap-combined.min.css" rel="stylesheet">
+		<style type="text/css">
+			body {
+				padding-top: 20px;
+				padding-bottom: 40px;
+			}
+			* {
+				-moz-box-sizing: border-box;
+				-webkit-box-sizing: border-box;
+				box-sizing: border-box;
+			}
+		</style>
+
+		<!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+		<!--[if lt IE 9]>
+			<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="container">
+
+			<div class="hero-unit">
+				<h1>RAGLDmap</h1>
+				<br />
+				<p>Sample map to demonstrate features of the RAGLDmap.js JQuery plugin.</p>
+				<p>Usage: <tt>$('.map').RAGLDmap({'source' : '<span class="text-info">[source url]</span>'});</tt></p>
+			</div>
+
+			<hr />
+
+			<div class="row">
+				<div class="span8" style="padding-right: 20px; border-right: 1px solid #eee">
+					<div class="map" style="height: 400px">
+						<div class="alert" style="height: 100%; text-align: center; padding-top: 140px"><h2>No map source specified.</h2></div>
+					</div>
+				</div>
+				<div class="span4">
+					<h2>Options</h2>
+					<p>Data source: <br />
+						<input type="text" id="source" class="input-block-level"></input>
+					</p>
+					<div class="sources">
+						<p style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+							<a href="#">http://dev.ragld.com/services/rdf2json/http%3A%2F%2Feducation.data.gov.uk%2Fdoc%2Fschool%2Fphase%2Fprimary.rdf%3F_view%3Dlocation%26_page%3D0%26localAuthority.label%3DSouthampton</a>
+						</p>
+						<p>
+							<a href="#">http://tom.ragld.com/services/tom/dump</a>
+						</p>
+						<p>
+							<a href="#">sample.json</a>
+						</p>
+					</div>
+					<p class="muted">&lt;other form elements to demonstrate map functions&gt;</p>
+				</div>
+			</div>
+
+			<hr />
+
+		</div> <!-- /container -->
+		<script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+		<script src="RAGLDmap.js"></script>
+		<script type="text/javascript">
+			$(document).ready(function () {
+
+				var source = '';
+				//bind loading map from textbox
+				$('#source').keyup( function(event) {
+					if(event.keyCode == 13){
+						source = $('#source').val();
+						$('.map').RAGLDmap({'source' : source});
+					}
+				});
+				//bind loading map from supplied links
+				$('.sources a').click( function(event) {
+					source = event.target.text;
+					$('#source').val(source);
+					$('.map').RAGLDmap({'source' : source});
+				});
+
+			});
+		</script>
+
+	</body>
+</html>
