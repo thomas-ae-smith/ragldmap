@@ -8,17 +8,7 @@
 		<meta name="author" content="taes1g09">
 
 		<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/css/bootstrap-combined.min.css" rel="stylesheet">
-		<style type="text/css">
-			body {
-				padding-top: 20px;
-				padding-bottom: 40px;
-			}
-			* {
-				-moz-box-sizing: border-box;
-				-webkit-box-sizing: border-box;
-				box-sizing: border-box;
-			}
-		</style>
+		<link href="RAGLDmap.css" rel="stylesheet">
 
 		<!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
 		<!--[if lt IE 9]>
@@ -40,9 +30,9 @@
 			<hr />
 
 			<div class="row">
-				<div class="span8" style="padding-right: 20px; border-right: 1px solid #eee">
+				<div class="span8 rightBorder">
 					<div class="map" style="height: 400px">
-						<div class="alert" style="height: 100%; text-align: center; padding-top: 140px"><h2>No map source specified.</h2></div>
+						<div class="alert mapWarning"><h2>No map source specified.</h2></div>
 					</div>
 				</div>
 				<div class="span4">
@@ -51,7 +41,7 @@
 						<input type="text" id="source" class="input-block-level"></input>
 					</p>
 					<div class="sources">
-						<p style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+						<p>
 							<a href="#">http://dev.ragld.com/services/rdf2json/http%3A%2F%2Feducation.data.gov.uk%2Fdoc%2Fschool%2Fphase%2Fprimary.rdf%3F_view%3Dlocation%26_page%3D0%26localAuthority.label%3DSouthampton</a>
 						</p>
 						<p>
@@ -74,6 +64,7 @@
 			$(document).ready(function () {
 
 				var source = '';
+
 				//bind loading map from textbox
 				$('#source').keyup( function(event) {
 					if(event.keyCode == 13){
@@ -81,6 +72,7 @@
 						$('.map').RAGLDmap({'source' : source});
 					}
 				});
+				
 				//bind loading map from supplied links
 				$('.sources a').click( function(event) {
 					source = event.target.text;
