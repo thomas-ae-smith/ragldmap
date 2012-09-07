@@ -76,12 +76,13 @@ $.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 
 	$.fn.RAGLDmap = function( method ) {
 
+		// if a method is specified and valid, call that
 		if ( methods[method] ) {
 			return methods[method].apply( this, Array.prototype.slice.call( arguments, 1 ));
-		} else if ( typeof method === 'object' || ! method ) {
+		} else if ( typeof method === 'object' || ! method ) {	//else if no method named, call init
 			console.log("default"+this);
 			return methods.initMap.apply( this, arguments );
-		} else {
+		} else {												//otherwise, complain.
 			$.error( 'Method ' +  method + ' does not exist on jQuery.RAGLDmap' );
 		}
 
