@@ -52,8 +52,9 @@ $.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 					console.log("Data retrieved:" + data);
 					console.log(data);
 					$.each(data, function(key, value) {
+						var label = (value['http://www.w3.org/2000/01/rdf-schema#label'])? value['http://www.w3.org/2000/01/rdf-schema#label'][0].value : key.slice(key.lastIndexOf("/", key.lastIndexOf("/")-1));
 						L.marker([value['http://www.w3.org/2003/01/geo/wgs84_pos#lat'][0].value, value['http://www.w3.org/2003/01/geo/wgs84_pos#long'][0].value]).addTo(map)
-						.bindPopup("<a href=\"" + key + "\">" + value['http://www.w3.org/2000/01/rdf-schema#label'][0].value + "<\a>");
+						.bindPopup("<a href=\"" + key + "\">" + label + "<\a>");
 					});
 
 				});
