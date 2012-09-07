@@ -51,13 +51,18 @@ $.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 				$.getJSON(source, function(data) {
 					console.log("Data retrieved:" + data);
 					console.log(data);
-					var label, lat, lng;
+					var label = "", lat = "", lng = "", invalid = 0;
 					$.each(data, function(key, value) {
-						lat = value['http://www.w3.org/2003/01/geo/wgs84_pos#lat'][0].value;
-						lng = value['http://www.w3.org/2003/01/geo/wgs84_pos#long'][0].value;
-						label = (value['http://www.w3.org/2000/01/rdf-schema#label'])? value['http://www.w3.org/2000/01/rdf-schema#label'][0].value : key.slice(key.lastIndexOf("/", key.lastIndexOf("/")-1));
-						L.marker([lat, lng]).addTo(map).bindPopup("<a href=\"" + key + "\">" + label + "<\a>");
+						try {
+							lat = value['http://www.w3.org/2003/01/geo/wgs84_pos#lat'][0].value;
+							lng = value['http://www.w3.org/2003/01/geo/wgs84_pos#long'][0].value;
+							label = (value['http://www.w3.org/2000/01/rdf-schema#label'])? value['http://www.w3.org/2000/01/rdf-schema#label'][0].value : key.slice(key.lastIndexOf("/", key.lastIndexOf("/")-1));
+							L.marker([lat, lng]).addTo(map).bindPopup("<a href=\"" + key + "\">" + label + "<\a>");
+						} catch (error) {
+							invalid += 1;
+						}
 					});
+					console.log("Found " + invalid + " unusable items.");
 
 				});
 			} catch (error) {
