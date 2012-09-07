@@ -62,7 +62,10 @@ $.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 							invalid += 1;
 						}
 					});
-					console.log("Found " + invalid + " unusable items.");
+					
+					if (invalid) {
+						$('<div class="text-warning">Found ' + invalid + " unusable items.</div>").insertAfter('.map');
+					}
 
 				});
 			} catch (error) {
