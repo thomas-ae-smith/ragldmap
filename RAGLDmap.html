@@ -72,9 +72,10 @@
 						$('.map').RAGLDmap({'source' : source});
 					}
 				});
-				
+
 				//bind loading map from supplied links
 				$('.sources a').click( function(event) {
+					event.preventDefault();
 					source = event.target.text;
 					$('#source').val(source);
 					$('.map').RAGLDmap({'source' : source});
