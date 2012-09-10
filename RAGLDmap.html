@@ -94,7 +94,7 @@
 						// map.remove();
 					})($('.map'))
 
-					$('.map').RAGLDmap({'source' : source});
+					$('.map').RAGLDmap({'source' : source, 'geo-location' : $("input[@name=geoLoc]:checked").val()});
 				});
 
 			});

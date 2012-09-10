@@ -9,11 +9,12 @@ $.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 (function( root, $ ){
 	var methods = {
 		initMap : function( options ) {
-
+			console.log("should locate:", options['geo-location']);
 			var settings = $.extend( {
 				'geo-location'			: true,
 				'APIkey'				: '285675b50972436798d67ce55ab7ddde'
 			}, options);
+			console.log("after should locate:", settings['geo-location']);
 
 
 			return this.each(function() {
@@ -30,15 +31,19 @@ $.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 						methods.setSource(map, settings.source);
 					}
 
-					try {
-						navigator.geolocation.getCurrentPosition( function(position) {
-							console.log("Current Geolocation:" + position);
-							map.setView([position.coords.latitude, position.coords.longitude], 13);
-							L.marker([position.coords.latitude, position.coords.longitude]).addTo(map)
-							.bindPopup('Current<br>geo-location.').openPopup();
-						})
-					} catch (error) {
-						console.log("Geolocation failed, set to default position.");
+					if (settings['geo-location'] == true) {
+						try {
+							navigator.geolocation.getCurrentPosition( function(position) {
+								console.log("Current Geolocation:" + position);
+								map.setView([position.coords.latitude, position.coords.longitude], 13);
+								L.marker([position.coords.latitude, position.coords.longitude]).addTo(map)
+								.bindPopup('Current<br>geo-location.').openPopup();
+							})
+						} catch (error) {
+							console.log("Geolocation failed, set to default position.");
+							map.setView([50.936592, -1.398697], 13);
+						}
+					} else {
 						map.setView([50.936592, -1.398697], 13);
 					}
 				});	//getscript
@@ -64,7 +69,7 @@ $.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 					});
 					
 					if (invalid) {
-						$('<div class="warning">Found ' + invalid + " unusable items.</div>").insertAfter('.map');
+						$('<div class="warning"><p class="text-warning">Warning: Found ' + invalid + " unusable items.</p></div>").insertAfter('.map');
 					}
 
 				});
