@@ -14,6 +14,8 @@
 		<!--[if lt IE 9]>
 			<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
 		<![endif]-->
+		<script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+		<script src="RAGLDmap.js"></script>
 	</head>
 
 	<body>
@@ -23,7 +25,9 @@
 			<div class="hero-unit">
 				<h1>RAGLDmap</h1>
 				<br />
-				<p>Sample map to demonstrate features of the RAGLDmap.js JQuery plugin.</p>
+				<p>Sample map page to demonstrate features of the RAGLDmap.js JQuery plugin.</p>
+				<p>Include: <tt>&lt;script src=&quot;http://code.jquery.com/jquery-1.7.2.min.js&quot;&gt;&lt;/script&gt; &lt;script src="RAGLDmap.js"&gt;&lt;/script&gt;</tt></p>
+				<p>Prepare: <tt>&lt;div class=&quot;map&quot; style=&quot;height : 400px&quot;&gt;&lt;/div&gt;</tt>
 				<p>Usage: <tt>$('.map').RAGLDmap({'source' : '<span class="text-info">[source url]</span>'});</tt></p>
 			</div>
 
@@ -68,8 +72,6 @@
 			<hr />
 
 		</div> <!-- /container -->
-		<script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
-		<script src="RAGLDmap.js"></script>
 		<script type="text/javascript">
 			$(document).ready(function () {
 
@@ -79,7 +81,7 @@
 				$('#source').keyup( function(event) {
 					if(event.keyCode == 13){
 						source = $('#source').val();
-						$('.map').RAGLDmap({'source' : source});
+						$('.map').RAGLDmap({'source' : source});		//refactor to include geoloc
 					}
 				});
 
