@@ -14,11 +14,11 @@ $.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 				'geo-location'			: true,
 				'APIkey'				: '285675b50972436798d67ce55ab7ddde'
 			}, options);
-			console.log("after should locate:", settings['geo-location']);
+			// console.log("after should locate:", settings['geo-location']);
 
 
 			return this.each(function() {
-				//at the moment the plugin calls getscript again before each creation - hacky solution to async
+				//at the moment the plugin calls getscript again before each creation
 				var this_ = this;	//sadly necessary due to above
 				$.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function(){
 					var map = L.map( this_, settings);
@@ -31,7 +31,8 @@ $.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 						methods.setSource(map, settings.source);
 					}
 
-					if (settings['geo-location'] == true) {
+					//TODO: fix string boolean comparison
+					if (settings['geo-location'] == 'true') {
 						try {
 							navigator.geolocation.getCurrentPosition( function(position) {
 								console.log("Current Geolocation:" + position);
