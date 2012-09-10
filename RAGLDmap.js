@@ -64,7 +64,7 @@ $.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 					});
 					
 					if (invalid) {
-						$('<div class="text-warning">Found ' + invalid + " unusable items.</div>").insertAfter('.map');
+						$('<div class="warning">Found ' + invalid + " unusable items.</div>").insertAfter('.map');
 					}
 
 				});

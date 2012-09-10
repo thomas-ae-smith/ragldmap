@@ -37,6 +37,16 @@
 				</div>
 				<div class="span4">
 					<h2>Options</h2>
+					<p>Geo-location: <br />
+						<label class="radio inline">
+							<input type="radio" name="geoLoc" id="geoLocOn" value="true" checked>
+							On
+						</label>
+						<label class="radio inline">
+							<input type="radio" name="geoLoc" id="geoLocOff" value="false">
+							Off
+						</label>
+					</p>
 					<p>Data source: <br />
 						<input type="text" id="source" class="input-block-level"></input>
 					</p>
@@ -78,6 +88,12 @@
 					event.preventDefault();
 					source = event.target.text;
 					$('#source').val(source);
+
+					(function(map) {
+						map.parent().empty().append($('<div class="map" style="height: 400px"></div>'));
+						// map.remove();
+					})($('.map'))
+
 					$('.map').RAGLDmap({'source' : source});
 				});
 
