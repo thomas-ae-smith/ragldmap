@@ -1,8 +1,22 @@
+//
+//
+//  Rapid Assembly of Geo-centred Linked Data applications (RAGLD)
+//
+//  A toolkit to help support application developers utilise geographic
+//  information. See http://www.ragld.com/ for further information
+//
+//  Javascript library providing mapping support and visualisation components.
+//
+//
+
+
+
 // inject the required css to the host page
 $('head').append('<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.css" /> ' +
 	'<!--[if lte IE 8]>' +
 	'<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.ie.css" />' +
 	'<![endif]-->');
+
 // load and execute the vanilla leaflet script
 $.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 // pass JQuery into the $ variable for convenience
@@ -12,7 +26,7 @@ $.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 			console.log("should locate:", options['geo-location']);
 			var settings = $.extend( {
 				'geo-location'			: true,
-				'APIkey'				: '285675b50972436798d67ce55ab7ddde' //replace with osm
+				'APIkey'				: '285675b50972436798d67ce55ab7ddde'	//replace with OSM
 			}, options);
 			// console.log("after should locate:", settings['geo-location']);
 
@@ -22,7 +36,7 @@ $.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 				var this_ = this;	//sadly necessary due to above
 				$.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function(){
 					var map = L.map( this_, settings);
-					L.tileLayer('http://{s}.tile.cloudmade.com/' + settings.APIkey + '/997/256/{z}/{x}/{y}.png', {  //TODO don't clobber map style
+					L.tileLayer('http://{s}.tile.cloudmade.com/' + settings.APIkey + '/997/256/{z}/{x}/{y}.png', {	//TODO don't clobber map styles
 						attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
 						maxZoom: 18
 					}).addTo(map);
@@ -80,7 +94,7 @@ $.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 		}	//setSource
 	};
 
-	$.fn.RAGLDmap = function( method ) {
+	$.fn.RAGLD = function( method ) {
 
 		// if a method is specified and valid, call that
 		if ( methods[method] ) {
@@ -89,7 +103,7 @@ $.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 			console.log("default"+this);
 			return methods.initMap.apply( this, arguments );
 		} else {												//otherwise, complain.
-			$.error( 'Method ' +  method + ' does not exist on jQuery.RAGLDmap' );
+			$.error( 'Method ' +  method + ' does not exist on jQuery.RAGLD' );
 		}
 
 	};
