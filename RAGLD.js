@@ -12,7 +12,7 @@ $.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 			console.log("should locate:", options['geo-location']);
 			var settings = $.extend( {
 				'geo-location'			: true,
-				'APIkey'				: '285675b50972436798d67ce55ab7ddde'
+				'APIkey'				: '285675b50972436798d67ce55ab7ddde' //replace with osm
 			}, options);
 			// console.log("after should locate:", settings['geo-location']);
 
@@ -22,7 +22,7 @@ $.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 				var this_ = this;	//sadly necessary due to above
 				$.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function(){
 					var map = L.map( this_, settings);
-					L.tileLayer('http://{s}.tile.cloudmade.com/' + settings.APIkey + '/997/256/{z}/{x}/{y}.png', {
+					L.tileLayer('http://{s}.tile.cloudmade.com/' + settings.APIkey + '/997/256/{z}/{x}/{y}.png', {  //TODO don't clobber map style
 						attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
 						maxZoom: 18
 					}).addTo(map);

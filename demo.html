@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>RAGLDmap example page</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="RAGLDmap example page">
+	<meta name="author" content="taes1g09">
+
+	<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/css/bootstrap-combined.min.css" rel="stylesheet">
+	<link href="RAGLDmap.css" rel="stylesheet">
+
+	<!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+		<!--[if lt IE 9]>
+			<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+			<![endif]-->
+			
+			<script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+			<script src="RAGLDmap.js"></script>
+		</head>
+
+		<body>
+
+			<div class="container">
+
+				<div class="hero-unit">
+					<h1>RAGLDmap</h1>
+					<br />
+					<p>Sample map page to demonstrate features of the RAGLDmap.js JQuery plugin.</p>
+					<p>Include: <tt>&lt;script src=&quot;http://code.jquery.com/jquery-1.7.2.min.js&quot;&gt;&lt;/script&gt; &lt;script src="RAGLDmap.js"&gt;&lt;/script&gt;</tt></p>
+					<p>Prepare: <tt>&lt;div class=&quot;map&quot; style=&quot;height : 400px&quot;&gt;&lt;/div&gt;</tt>
+						<p>Usage: <tt>$('.map').RAGLDmap({'source' : '<span class="text-info">[source url]</span>'});</tt></p>
+					</div>
+
+					<hr />
+
+					<div class="row">
+						<div class="span8 rightBorder">
+							<div class="map" style="height: 400px">
+								<div class="alert mapWarning"><h2>No map source specified.</h2></div>
+							</div>
+						</div>
+						<div class="span4">
+							<h2>Options</h2>
+							<p>Geo-location: <br />
+								<label class="radio inline">
+									<input type="radio" name="geoLoc" id="geoLocOn" value="true" checked>
+									On
+								</label>
+								<label class="radio inline">
+									<input type="radio" name="geoLoc" id="geoLocOff" value="false">
+									Off
+								</label>
+							</p>
+							<p>Data source: <br />
+								<input type="text" id="source" class="input-block-level"></input>
+							</p>
+							<div class="sources">
+								<p>
+									<a href="#">http://tom.ragld.com/services/rdf2json/http%3A%2F%2Feducation.data.gov.uk%2Fdoc%2Fschool%2Fphase%2Fprimary.rdf%3F_view%3Dlocation%26_page%3D0%26localAuthority.label%3DSouthampton</a>
+								</p>
+								<p>
+									<a href="#">http://tom.ragld.com/services/tom/dump</a>
+								</p>
+								<p>
+									<a href="#">sample.json</a>
+								</p>
+							</div>
+							<p class="muted">&lt;other form elements to demonstrate map functions&gt;</p>
+						</div>
+					</div>
+
+					<hr />
+
+				</div> <!-- /container -->
+				<script type="text/javascript">
+				$(document).ready(function () {
+
+					var source = '';
+
+				//bind loading map from textbox
+				$('#source').keyup( function(event) {
+					if(event.keyCode == 13){
+						source = $('#source').val();
+						$('.map').RAGLDmap({'source' : source});		//refactor to include geoloc
+					}
+				});
+
+				//bind loading map from supplied links
+				$('.sources a').click( function(event) {
+					event.preventDefault();
+					source = event.target.text;
+					$('#source').val(source);
+
+					(function(map) {
+						map.parent().empty().append($('<div class="map" style="height: 400px"></div>'));
+						// map.remove();
+					})($('.map'))
+
+					$('.map').RAGLDmap({'source' : source, 'geo-location' : $("input[@name=geoLoc]:checked").val()});
+				});
+
+			});
+				</script>
+
+			</body>
+			</html>
