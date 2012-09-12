@@ -25,8 +25,7 @@ $.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 		initMap : function( options ) {
 			console.log("should locate:", options['geo-location']);
 			var settings = $.extend( {
-				'geo-location'			: true,
-				'APIkey'				: '285675b50972436798d67ce55ab7ddde'	//replace with OSM
+				'geo-location'			: false,
 			}, options);
 			// console.log("after should locate:", settings['geo-location']);
 
@@ -36,10 +35,12 @@ $.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 				var this_ = this;	//sadly necessary due to above
 				$.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function(){
 					var map = L.map( this_, settings);
-					L.tileLayer('http://{s}.tile.cloudmade.com/' + settings.APIkey + '/997/256/{z}/{x}/{y}.png', {	//TODO don't clobber map styles
-						attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
+
+					L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+						attribution: 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a>',
 						maxZoom: 18
 					}).addTo(map);
+
 
 					if (settings.source) {
 						methods.setSource(map, settings.source);
