@@ -52,12 +52,25 @@
 								Off
 							</label>
 						</p>
+						<p>CloudMade tiles: <br />
+							<label class="radio inline">
+								<input type="radio" name="cloudMade" id="cMOn" value="true">
+								On
+							</label>
+							<label class="radio inline">
+								<input type="radio" name="cloudMade" id="cMOff" value="false" checked>
+								Off
+							</label>
+						</p>
 						<p>Data source: <br />
 							<input type="text" id="source" class="input-block-level"></input>
 						</p>
 						<div class="sources">
 							<p>
-								<a href="#">http://tom.ragld.com/services/rdf2json/http%3A%2F%2Feducation.data.gov.uk%2Fdoc%2Fschool%2Fphase%2Fprimary.rdf%3F_view%3Dlocation%26_page%3D0%26localAuthority.label%3DSouthampton</a>
+								<a href="#">http://tom.ragld.com/services/rdf2json/http%3A%2F%2Feducation.data.gov.uk%2Fdoc%2Fschool%2Fphase%2Fprimary.rdf%3F_view%3Dlocation%26_page%3D0%26localAuthority.label%3DSouthampton%26_pageSize=100</a>
+							</p>
+							<p>
+								<a href="#">http://nhs.data.seme4.com/geospatial/points/nearest/55.9/-1.4/10/</a>
 							</p>
 							<p>
 								<a href="#">http://tom.ragld.com/services/tom/dump</a>
@@ -76,29 +89,36 @@
 			<script type="text/javascript">
 			$(document).ready(function () {
 
-				var source = '';
-
 				//bind loading map from textbox
 				$('#source').keyup( function(event) {
 					if(event.keyCode == 13){
-						source = $('#source').val();
-						$('.map').RAGLD({'source' : source});    //refactor to include geoloc
+						updateMap()
 					}
 				});
 
 				//bind loading map from supplied links
 				$('.sources a').click( function(event) {
 					event.preventDefault();
-					source = event.target.text;
-					$('#source').val(source);
+					$('#source').val(event.target.text);
 
-					(function(map) {
-						map.parent().empty().append($('<div class="map" style="height: 400px"></div>'));
-						// map.remove();
-					})($('.map'))
+					$('.map').parent().empty().append($('<div class="map" style="height: 400px"></div>'));
 
-					$('.map').RAGLD({'source' : source, 'geo-location' : $("input[@name=geoLoc]:checked").val()});
+					updateMap();
 				});
+
+				//unified map creation
+				function updateMap() {
+					// 3 ways:
+					// 1)use the input value in constructor
+					// $('.map').RAGLD({'source' : $('#source').val(), 'geoLocation' : $('#geoLocOn').is(':checked'), 'cloudMade' : $('#cMOn').is(':checked')});
+
+					// 2)construct, and then use the input value
+					// $('.map').RAGLD({'geoLocation' : $('#geoLocOn').is(':checked'), 'cloudMade' : $('#cMOn').is(':checked')});
+					// $('.map').RAGLD('showNewPoints', $('#source').val());
+
+					// 3)construct with input value and an additional one (temporary)
+					$('.map').RAGLD({'sources' : [$('#source').val(), 'sample.json'], 'geoLocation' : $('#geoLocOn').is(':checked'), 'cloudMade' : $('#cMOn').is(':checked')});
+				}
 
 			});
 			</script>
