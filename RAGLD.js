@@ -9,27 +9,45 @@
 //
 //
 
-
-
-// inject the required css to the host page
-$('head').append('<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.css" /> ' +
-	'<!--[if lte IE 8]>' +
-	'<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.ie.css" />' +
-	'<![endif]-->');
-
-var root = this;
-
-// load and execute the vanilla leaflet script
-$.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 // pass JQuery into the $ variable for convenience
-(function( root, $ ){
+(function (window, $, undefined) {
+
+	var RAGLD, RAGLD_orig;
+
+	if (typeof exports !== undefined + '') {
+		RAGLD = exports;
+	} else {
+		RAGLD_orig = window.RAGLD;
+		RAGLD = {};
+
+		RAGLD.noConflict = function () {
+			window.RAGLD = RAGLD_orig;
+			return this;
+		};
+
+		window.RAGLD = RAGLD;
+	}
+
+	RAGLD.version = '0.1';
+
+	// load and execute the vanilla leaflet script. 
+	var LeafletLoaded = $.Deferred(function( defer ) {
+		$.getScript( "http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js" ).then( defer.resolve, defer.reject );
+	}).promise();
+
+
+	// inject the required css to the host page
+	$('head').append('<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.css" /> ' +
+		'<!--[if lte IE 8]>' +
+		'<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.ie.css" />' +
+		'<![endif]-->');
+
 	var methods = {};
 	var RAGLDsources = [];
 	var RAGLDmaps = [];
-	var RAGLDmarkers = (function() {
-		var markers = {};
-		markers.colours = ['blue', 'green', 'red', 'yellow', 'purple'];
-		markers.auto = 0;
+	var RAGLDmarkers = {'colours' : ['blue', 'green', 'red', 'yellow', 'purple'], 'auto' : 0};
+	LeafletLoaded.done( function () {
+		console.log("Making Markers");
 		var RAGLDMarker = L.Icon.extend({
 			options: {
 				shadowUrl: 'assets/images/marker-shadow.png',
@@ -40,38 +58,52 @@ $.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 				popupAnchor:	[0, -33]
 			}
 		});
-		$.each(markers.colours, function(index, value) {
-			markers[value] = new RAGLDMarker({iconUrl: 'assets/images/marker-icon-' + value + '.png'});
+		$.each(RAGLDmarkers.colours, function(index, value) {
+			RAGLDmarkers[value] = new RAGLDMarker({iconUrl: 'assets/images/marker-icon-' + value + '.png'});
 		})
-		return markers;
-	})();
+	});
 
-	function MapSource(dataSource) {
-		var markers = [];
-		console.log("Data received:", dataSource.data);
-		var label = "", lat = "", lng = "", invalid = 0, marker = {};
-		console.log("Colour is " + dataSource.colour + " and marker is ", RAGLDmarkers[dataSource.colour]); //TODO use of newSource is confusing with source
-		$.each(dataSource.data, function(key, value) {
-			try {
-				lat = value['http://www.w3.org/2003/01/geo/wgs84_pos#lat'][0].value;
-				lng = value['http://www.w3.org/2003/01/geo/wgs84_pos#long'][0].value;
-				label = (value['http://www.w3.org/2000/01/rdf-schema#label'])? value['http://www.w3.org/2000/01/rdf-schema#label'][0].value : key.slice(key.lastIndexOf("/", key.lastIndexOf("/")-1));
-				// console.log("Setting marker for " + label + " at [" + lat + "," + lng + "].");
-				marker = L.marker([lat, lng], {icon: RAGLDmarkers[dataSource.colour]})
-				marker.addTo(map).bindPopup("<a href=\"" + key + "\">" + label + "<\a>");
-				markers.push(marker);
-			} catch (error) {
-				invalid += 1;
-			}
-		});
-
-		if (invalid) {
-			$('<div class="warning"><p class="text-warning">Warning: Found ' + invalid + " unusable items.</p></div>").insertAfter('.map');
+	function MapSource(anySource) {
+		if (anySource instanceof MapSource) {
+			console.log(anysource, "is already a mapsource")
+			return anySource;
 		}
 
-		var mapSource = L.layerGroup(markers);
-		mapSource.invalid = invalid;
+		var deferred = $.Deferred();
+		var mapSource =  L.featureGroup();
+		mapSource.loaded = deferred.promise()
+		mapSource.invalid = 0;
+		var dataSource = RAGLD.dataSource(anySource); 	//TODO: don't like using the specifier
 		mapSource.sourceURI = dataSource.sourceURI;
+
+
+		$.when(dataSource.loaded).then(function (dataSource) {
+			console.log("Data received:", dataSource.data);
+			var label = "", lat = "", lng = "", marker = {};
+			console.log("Colour is " + dataSource.colour + " and marker is ", RAGLDmarkers[dataSource.colour]);
+			$.each(dataSource.data, function(key, value) {
+				try {
+					lat = value['http://www.w3.org/2003/01/geo/wgs84_pos#lat'][0].value;
+					lng = value['http://www.w3.org/2003/01/geo/wgs84_pos#long'][0].value;
+					label = (value['http://www.w3.org/2000/01/rdf-schema#label'])? value['http://www.w3.org/2000/01/rdf-schema#label'][0].value : key.slice(key.lastIndexOf("/", key.lastIndexOf("/")-1));
+					// console.log("Setting marker for " + label + " at [" + lat + "," + lng + "].");
+					marker = L.marker([lat, lng], {icon: RAGLDmarkers[dataSource.colour]})
+					marker.bindPopup("<a href=\"" + key + "\">" + label + "<\a>");
+					mapSource.addLayer(marker);
+				} catch (error) {
+					mapSource.invalid += 1;
+				}
+			});
+
+			if (mapSource.invalid) {
+				$('<div class="warning"><p class="text-warning">Warning: Found ' + invalid + " unusable items.</p></div>").insertAfter('.map');
+			}
+
+			deferred.resolve(mapSource);
+		},
+		function (error) {
+			deferred.reject(error);
+		});
 		return mapSource;
 	}
 
@@ -106,25 +138,44 @@ $.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 
 		map.mapSources = [];
 
-		this.prototype.addSource = function (sourceURI) {
+		this.prototype.addSource = function (anySource, lookAt) {	// anySource could be a MapSource, DataSource or URI string
 			var map = this;
+			var lookAt = lookAt || true; // if it's undefined, make sure it's false
 
-			$.when(methods.dataSource(sourceURI)).then( function(newSource) {
-				var mapSource = MapSource(newSource);
+			console.log("addsource.anysource is", anySource);
+			var mapSource = MapSource(anySource);
+
+			$.when(mapSource.loaded).then( function (mapSource) {
+
 				map.mapSources.push(mapSource);
 				mapSource.addTo(map);
+				L.control.layers(null, map.mapSources).addTo(map);	//TODO: ensure this only happens once
+
+
+				if (lookAt) {
+					map.zoomToSource(mapSource);
+				}
 			});
 
+
 		};
+
 		this.prototype.clearSources = function () {
 			var map = this;
-			$.each(map.mapSources, function() {
-				var mapSource = this;
-				$.each(mapSource.markers, function() {
-					map.removeLayer(marker)
-				})
-			})
+			$.each(map.mapSources, function(mapSource) {
+				map.removeLayer(mapSource);
+			});
+			map.mapSources.length = 0; // forget about the existing contents.
 		};
+
+		this.prototype.removeSource = function () {
+			//TODO
+		}
+
+		this.prototype.zoomToSource = function (mapSource) {
+			var map = this;
+			map.fitBounds(mapSource.getBounds());
+		}
 
 
 		L.tileLayer( settings.tileString, {
@@ -140,6 +191,7 @@ $.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 			console.log("sources", settings.sources);
 			$.each(settings.sources, function(index, value) {
 				// methods.showNewPoints(map, value)
+				console.log("about to add", value)
 				map.addSource(value);
 			});
 		}
@@ -160,88 +212,49 @@ $.getScript("http://cdn.leafletjs.com/leaflet-0.4.3/leaflet.js", function() {
 		return map;
 	}
 
-	this.map = function (id, options) {
+	RAGLD.map = function (id, options) {
 		return Map(id, options);
 	};
 
-	console.log("GotScript. This is ", this, " root is ", root);
-	console.log("markers are ", RAGLDmarkers);
+	function DataSource(sourceURI, colour) {
+		var deferred = $.Deferred();
+		var dataSource = this;
+		dataSource.loaded = deferred.promise()
 
-	$.fn.RAGLD = function( method ) {
+		dataSource.sourceURI = sourceURI;
 
-		// if a method is specified and valid, call that
-		if ( methods[method] ) {
-			return methods[method].apply( this, Array.prototype.slice.call( arguments, 1 ));
-		} else if ( typeof method === 'object' || ! method ) {	//else if no method named, call init
-			return methods.createMap.apply( this, arguments );
-		} else {												//otherwise, complain.
-			$.error( 'Method ' +  method + ' does not exist on jQuery.RAGLD' );
-		};
-	};
-
-	methods = {
-		createMap : function( options ) {
-			map = map( this[0], options);
-			return;
-		},	//createMap
-
-		dataSource : function( sourceURI, colour ) {
-			var deferred = $.Deferred();
-
-			var newSource = {};
-			newSource.source = sourceURI;
-
-			newSource.colour = (function(colour) {
-				if ($.inArray(colour, RAGLDmarkers.colours) >= 0) {
-					return colour;
-				}
-				//TODO: candidate for map reduce, but not familar enough with it yet
-				//this works for the moment, sorta.
-				RAGLDmarkers.auto += 1;		//TODO loop around and use 
-				return RAGLDmarkers.colours[RAGLDmarkers.auto-1];
-			})(colour);
-			console.log("Adding " + newSource.colour + " source data from " + sourceURI);
-
-			try {
-				$.getJSON(sourceURI, function(data) {
-					console.log("Data retrieved:", data);
-					newSource.data = data;
-					RAGLDsources.push(newSource);
-					deferred.resolve(newSource);
-				});
-			} catch (error) {
-				console.log("Loading JSON failed:" + error);
-				deferred.reject(error);
+		dataSource.colour = (function(colour) {
+			if ($.inArray(colour, RAGLDmarkers.colours) >= 0) {
+				return colour;
 			}
+			//TODO: candidate for map reduce, but not familar enough with it yet
+			//this works for the moment, sorta.
+			RAGLDmarkers.auto += 1;		//TODO loop around and use 
+			return RAGLDmarkers.colours[RAGLDmarkers.auto-1];
+		})(colour);
+		console.log("Adding " + dataSource.colour + " source data from " , dataSource.sourceURI);
 
-			return deferred.promise();
-		},	//dataSource
-
-		showNewPoints : function( map, sourceURI ) {
-			console.log("Map is ", map);
-			$.when(methods.dataSource(sourceURI)).then( function(newSource) {
-				console.log("Data received:", newSource.data);
-				var label = "", lat = "", lng = "", invalid = 0;
-				console.log("Colour is " + newSource.colour + " and marker is ", markers[newSource.colour]); //TODO use of newSource is confusing with source
-				$.each(newSource.data, function(key, value) {
-					try {
-						lat = value['http://www.w3.org/2003/01/geo/wgs84_pos#lat'][0].value;
-						lng = value['http://www.w3.org/2003/01/geo/wgs84_pos#long'][0].value;
-						label = (value['http://www.w3.org/2000/01/rdf-schema#label'])? value['http://www.w3.org/2000/01/rdf-schema#label'][0].value : key.slice(key.lastIndexOf("/", key.lastIndexOf("/")-1));
-							// console.log("Setting marker for " + label + " at [" + lat + "," + lng + "].");
-							L.marker([lat, lng], {icon: RAGLDmarkers[newSource.colour]}).addTo(map).bindPopup("<a href=\"" + key + "\">" + label + "<\a>");
-						} catch (error) {
-							invalid += 1;
-						}
-					});
-
-				if (invalid) {
-					$('<div class="warning"><p class="text-warning">Warning: Found ' + invalid + " unusable items.</p></div>").insertAfter('.map');
-				}
+		try {
+			$.getJSON(sourceURI, function(data) {
+				console.log("Data retrieved:", data);
+				dataSource.data = data;
+				RAGLDsources.push(dataSource);
+				deferred.resolve(dataSource);
 			});
+		} catch (error) {
+			console.log("Loading JSON failed:" + error);
+			deferred.reject(error);
+		}
 
-		}	//showPoints
+		return dataSource;
+	};	//DataSource
+
+	RAGLD.dataSource = function (anySource, colour) {
+		if (anySource instanceof DataSource) {
+			console.log(anySource, "is already a dataSource.");
+			return anySource;		//TODO: setColour?
+		}
+		return new DataSource(anySource, colour);
 	};
 
-})( root, jQuery );
-});
+})( this, jQuery );

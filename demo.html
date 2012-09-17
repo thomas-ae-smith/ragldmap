@@ -76,6 +76,12 @@
 								<a href="#">http://tom.ragld.com/services/tom/dump</a>
 							</p>
 							<p>
+								<a href="#">http://nhs.data.seme4.com/busses/points/bbox/50.9/-1.4/0.01/</a>
+							</p>
+							<p>
+								<a href="#">http://beta.ragld.com/services/addlabels/http%3A%2F%2Fnhs.data.seme4.com%2Fbusses%2Fpoints%2Fbbox%2F50.9%2F-1.4%2F0.01%2F</a>
+							</p>
+							<p>
 								<a href="#">sample.json</a>
 							</p>
 						</div>
@@ -108,16 +114,8 @@
 
 				//unified map creation
 				function updateMap() {
-					// 3 ways:
-					// 1)use the input value in constructor
-					// $('.map').RAGLD({'source' : $('#source').val(), 'geoLocation' : $('#geoLocOn').is(':checked'), 'cloudMade' : $('#cMOn').is(':checked')});
-
-					// 2)construct, and then use the input value
-					// $('.map').RAGLD({'geoLocation' : $('#geoLocOn').is(':checked'), 'cloudMade' : $('#cMOn').is(':checked')});
-					// $('.map').RAGLD('showNewPoints', $('#source').val());
-
-					// 3)construct with input value and an additional one (temporary)
-					$('.map').RAGLD({'sources' : [$('#source').val(), 'sample.json'], 'geoLocation' : $('#geoLocOn').is(':checked'), 'cloudMade' : $('#cMOn').is(':checked')});
+					// 4) refactored API
+					RAGLD.map($('.map')[0], {'sources' : [$('#source').val(), 'sample.json'], 'geoLocation' : $('#geoLocOn').is(':checked'), 'cloudMade' : $('#cMOn').is(':checked')});
 				}
 
 			});
