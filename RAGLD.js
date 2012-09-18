@@ -208,14 +208,14 @@
 
 
 			if ('source' in settings) {
-				methods.showNewPoints(map, settings.source);
+				map.addSource(settings.source);
 			}
 
 			if ('sources' in settings) {
 				console.log("sources", settings.sources);
 				$.each(settings.sources, function(index, value) {
 					// methods.showNewPoints(map, value)
-					console.log("about to add", value)
+					console.log("about to add", value);
 					map.addSource(value);
 				});
 			}
