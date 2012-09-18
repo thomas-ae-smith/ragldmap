@@ -73,11 +73,12 @@
 		var mapSource =  L.featureGroup();
 		mapSource.loaded = deferred.promise()
 		mapSource.invalid = 0;
-		var dataSource = RAGLD.dataSource(anySource); 	//TODO: don't like using the specifier
-		mapSource.sourceURI = dataSource.sourceURI;
+		mapSource.dataSource = RAGLD.dataSource(anySource); 	//TODO: don't like using RAGLD specifier internally
+		mapSource.getLabel = function () {
+			return this.dataSource.label;
+		}
 
-
-		$.when(dataSource.loaded).then(function (dataSource) {
+		$.when(mapSource.dataSource.loaded).then(function (dataSource) {
 			console.log("Data received:", dataSource.data);
 			var label = "", lat = "", lng = "", marker = {};
 			console.log("Colour is " + dataSource.colour + " and marker is ", RAGLDmarkers[dataSource.colour]);
@@ -96,7 +97,7 @@
 			});
 
 			if (mapSource.invalid) {
-				$('<div class="warning"><p class="text-warning">Warning: Found ' + invalid + " unusable items.</p></div>").insertAfter('.map');
+				$('<div class="warning"><p class="text-warning">Warning: Found ' + mapSource.invalid + " unusable items.</p></div>").insertAfter('.map');
 			}
 
 			deferred.resolve(mapSource);
@@ -115,6 +116,7 @@
 			'cloudMade'				: false,
 			'center'				: [50.936592, -1.398697],
 			'zoom'					: 13,
+			'onAddSource'			: 'zoomAll',
 
 			'APIkey'				: '285675b50972436798d67ce55ab7ddde'	//TODO: remove. Included for testing purposes
 		}, options);
@@ -131,97 +133,125 @@
 			}, settings);
 		}
 
-		map = L.map( id, settings);		//L.map() creates a new object. 
-		this.prototype = L.Map.prototype;
-		
-		RAGLDmaps.push(map);
+		LeafletLoaded.done( function () {
 
-		map.mapSources = [];
+			map = L.map( id, settings);		//L.map() creates a new object. 
+			this.prototype = L.Map.prototype;
 
-		this.prototype.addSource = function (anySource, lookAt) {	// anySource could be a MapSource, DataSource or URI string
-			var map = this;
-			var lookAt = lookAt || true; // if it's undefined, make sure it's false
+			RAGLDmaps.push(map);
 
-			console.log("addsource.anysource is", anySource);
-			var mapSource = MapSource(anySource);
+			map.mapSources = {};
 
-			$.when(mapSource.loaded).then( function (mapSource) {
+			this.prototype.addSource = function (anySource, lookAt) {	// anySource could be a MapSource, DataSource or URI string
+				var map = this;
 
-				map.mapSources.push(mapSource);
-				mapSource.addTo(map);
-				L.control.layers(null, map.mapSources).addTo(map);	//TODO: ensure this only happens once
+				// console.log("addsource.anysource is", anySource);
+				var mapSource = MapSource(anySource);
 
-
-				if (lookAt) {
-					map.zoomToSource(mapSource);
-				}
-			});
+				$.when(mapSource.loaded).then( function (mapSource) {
+					console.log("Loaded mapSource ", mapSource.getLabel());
+					if (!map.mapSources[mapSource.getLabel()]) {
+						map.mapSources[mapSource.getLabel()] = mapSource;
+						mapSource.addTo(map);
+						map.layerControl.addOverlay(mapSource, mapSource.getLabel());
 
 
-		};
-
-		this.prototype.clearSources = function () {
-			var map = this;
-			$.each(map.mapSources, function(mapSource) {
-				map.removeLayer(mapSource);
-			});
-			map.mapSources.length = 0; // forget about the existing contents.
-		};
-
-		this.prototype.removeSource = function () {
-			//TODO
-		}
-
-		this.prototype.zoomToSource = function (mapSource) {
-			var map = this;
-			map.fitBounds(mapSource.getBounds());
-		}
+						console.log("settings:" , settings);
+						if (lookAt || settings.onAddSource === "zoom") {
+							map.zoomToSource(mapSource);
+						} else if (settings.onAddSource === "zoomAll") {
+							map.zoomToAllSources();
+						}
+					} else {
+						console.log("MapSource" , mapSource.getLabel() , "already exists on this map." );
+					}
+				});
 
 
-		L.tileLayer( settings.tileString, {
-			attribution: settings.attribution,
-		}).addTo(map);
+			};
 
+			this.prototype.clearSources = function () {
+				var map = this;
+				$.each(map.mapSources, function(mapSource) {
+					map.removeLayer(mapSource);
+				});
+				map.mapSources.length = 0; // forget about the existing contents.
+			};
 
-		if ('source' in settings) {
-			methods.showNewPoints(map, settings.source);
-		}
-
-		if ('sources' in settings) {
-			console.log("sources", settings.sources);
-			$.each(settings.sources, function(index, value) {
-				// methods.showNewPoints(map, value)
-				console.log("about to add", value)
-				map.addSource(value);
-			});
-		}
-
-		if (settings['geoLocation']) {
-			try {
-				navigator.geolocation.getCurrentPosition( function(position) {
-					console.log("Current Geolocation:" + position);
-					map.setView([position.coords.latitude, position.coords.longitude], settings.zoom);
-					L.marker([position.coords.latitude, position.coords.longitude]).addTo(map)
-					.bindPopup('Current<br>geo-location.').openPopup();
-				})
-			} catch (error) {
-				console.log("Geolocation failed, remained at default position.");	//TODO: sensible defaults. maybe
+			this.prototype.removeSource = function () {
+				//TODO
 			}
-		} //if geoLocation
 
-		return map;
+			this.prototype.zoomToSource = function (mapSource) {
+				var map = this;
+				map.fitBounds(mapSource.getBounds());
+			}
+
+			this.prototype.zoomToAllSources = function () {
+				console.log("zooming to all sources");
+				var map = this;
+				var bounds = new L.LatLngBounds();
+					$.each(map.mapSources, function (key, value) {
+						console.log("This layer: " + key);
+						bounds.extend(value.getBounds());
+					});
+				map.fitBounds(bounds);
+			}
+
+
+			map.layerControl = L.control.layers().addTo(map).addBaseLayer(									//create and add a layer control
+				L.tileLayer( settings.tileString, {										//create the base map layer
+					attribution: settings.attribution,									//with attribution
+				}).addTo(map), 															//add it to the map
+				(settings['cloudMade'] && 'APIkey' in settings)? "CloudMade" : "OSM"	//label for the base layer
+			);
+
+
+			if ('source' in settings) {
+				methods.showNewPoints(map, settings.source);
+			}
+
+			if ('sources' in settings) {
+				console.log("sources", settings.sources);
+				$.each(settings.sources, function(index, value) {
+					// methods.showNewPoints(map, value)
+					console.log("about to add", value)
+					map.addSource(value);
+				});
+			}
+
+			if (settings['geoLocation']) {
+				try {
+					navigator.geolocation.getCurrentPosition( function(position) {
+						console.log("Current Geolocation:" + position);
+						map.setView([position.coords.latitude, position.coords.longitude], settings.zoom);
+						L.marker([position.coords.latitude, position.coords.longitude]).addTo(map)
+						.bindPopup('Current<br>geo-location.').openPopup();
+					})
+				} catch (error) {
+					console.log("Geolocation failed, remained at default position.");	//TODO: sensible defaults. maybe
+				}
+			} //if geoLocation
+
+			return map;
+
+		});
 	}
 
 	RAGLD.map = function (id, options) {
 		return Map(id, options);
 	};
 
-	function DataSource(sourceURI, colour) {
+	function DataSource(sourceURI, label, colour) {		//TODO: ensure that this could also accept a DataSource or other non-string
+		//TODO: pre-existence checking
 		var deferred = $.Deferred();
 		var dataSource = this;
 		dataSource.loaded = deferred.promise()
 
 		dataSource.sourceURI = sourceURI;
+		dataSource.label = label || ((sourceURI.indexOf("http://") == 0)? sourceURI.substr(7, 32)  + "..." : sourceURI.substr(0,35)); //TODO: ellipsis should only be added if actually truncated
+
+		console.log("Label:" + dataSource.label);
 
 		dataSource.colour = (function(colour) {
 			if ($.inArray(colour, RAGLDmarkers.colours) >= 0) {
