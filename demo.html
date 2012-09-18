@@ -63,7 +63,8 @@
 							</label>
 						</p>
 						<p>Data source: <br />
-							<input type="text" id="source" class="input-block-level"></input>
+							<input type="text" id="sourceURI" class="input-block-level" value="sample.json" />
+							<input type="hidden" id="sourceName" value="Sample Data" />
 						</p>
 						<div class="sources">
 							<p>
@@ -94,6 +95,9 @@
 			</div> <!-- /container -->
 			<script type="text/javascript">
 			$(document).ready(function () {
+				//unified map creation
+				var map = RAGLD.map($('.map')[0], {'geoLocation' : $('#geoLocOn').is(':checked'), 'cloudMade' : $('#cMOn').is(':checked')});
+				console.log("map1:" ,map);
 
 				//bind loading map from textbox
 				$('#source').keyup( function(event) {
@@ -105,18 +109,16 @@
 				//bind loading map from supplied links
 				$('.sources a').click( function(event) {
 					event.preventDefault();
-					$('#source').val(event.target.text);
-
-					$('.map').parent().empty().append($('<div class="map" style="height: 400px"></div>'));
+					$('#sourceURI').val(event.target.text);
 
 					updateMap();
 				});
 
-				//unified map creation
 				function updateMap() {
-					// 4) refactored API
-					RAGLD.map($('.map')[0], {'sources' : [$('#source').val(), 'sample.json'], 'geoLocation' : $('#geoLocOn').is(':checked'), 'cloudMade' : $('#cMOn').is(':checked')});
-				}
+					//should be interchangeable.
+					// RAGLD.dataSource($('#sourceURI').val()).addTo(map);
+					this.map.addSource($('#sourceURI').val());
+				};
 
 			});
 			</script>
